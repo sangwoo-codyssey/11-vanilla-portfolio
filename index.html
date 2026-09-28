@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="코디세이에서 소프트웨어 기초를 공부하고 있는 이상우의 포트폴리오">
+  <title>이상우 · 포트폴리오</title>
+
+  <link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+  <header class="site-header">
+    <nav class="nav container" aria-label="주요 메뉴">
+      <a class="nav__logo" href="#hero">이상우</a>
+
+      <ul class="nav__menu" id="nav-menu">
+        <li><a class="nav__link" href="#about">About</a></li>
+        <li><a class="nav__link" href="#skills">Skills</a></li>
+        <li><a class="nav__link" href="#projects">Projects</a></li>
+        <li><a class="nav__link" href="#contact">Contact</a></li>
+      </ul>
+
+      <button class="theme-toggle" type="button" aria-pressed="false">
+        <span class="theme-toggle__label">다크 모드</span>
+      </button>
+
+      <button class="nav__toggle" type="button" aria-controls="nav-menu" aria-expanded="false" aria-label="메뉴 열기">
+        <span class="nav__toggle-bar"></span>
+        <span class="nav__toggle-bar"></span>
+        <span class="nav__toggle-bar"></span>
+      </button>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero container" id="hero" aria-labelledby="hero-title">
+      <p class="eyebrow">Codyssey · Software Fundamentals</p>
+      <h1 class="hero__title" id="hero-title">안녕하세요,<br>코디세이에서 공부하고 있는 <span class="hero__name">이상우</span>입니다.</h1>
+      <p class="hero__lead">인프라, Python, 자료구조, 데이터베이스를 미션 단위로 직접 만들며 익히고 있습니다.</p>
+      <div class="hero__actions">
+        <a class="button button--primary" href="#projects">프로젝트 보기</a>
+        <a class="button" href="#contact">문의하기</a>
+      </div>
+    </section>
+
+    <section class="section container" id="about" aria-labelledby="about-title">
+      <header class="section__header reveal">
+        <p class="eyebrow">01</p>
+        <h2 class="section__title" id="about-title">About</h2>
+      </header>
+      <div class="about reveal">
+        <img class="about__image" src="images/profile.svg" alt="이상우의 프로필 일러스트 — 원 안에 사람 모양 실루엣" width="160" height="160">
+        <div class="about__text">
+          <p>코디세이에서 소프트웨어 기초를 공부하고 있는 이상우입니다.</p>
+          <p>Nginx·Docker 같은 인프라부터 Python CLI, 직접 구현한 자료구조, SQL 데이터베이스까지 미션마다 하나씩 만들어 보고, 만든 것을 측정하고 기록하는 방식으로 배우고 있습니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container" id="skills" aria-labelledby="skills-title">
+      <header class="section__header reveal">
+        <p class="eyebrow">02</p>
+        <h2 class="section__title" id="skills-title">Skills</h2>
+      </header>
+      <ul class="skills reveal">
+        <li class="skill">HTML / CSS / JavaScript</li>
+        <li class="skill">Python</li>
+        <li class="skill">SQL (MySQL)</li>
+        <li class="skill">Git / GitHub</li>
+        <li class="skill">Linux / Bash</li>
+        <li class="skill">Docker</li>
+        <li class="skill">Nginx</li>
+      </ul>
+    </section>
+
+    <section class="section container" id="projects" aria-labelledby="projects-title">
+      <header class="section__header reveal">
+        <p class="eyebrow">03</p>
+        <h2 class="section__title" id="projects-title">Projects</h2>
+        <p class="section__desc">GitHub 에서 공개 저장소를 불러옵니다.</p>
+      </header>
+      <div class="projects" id="projects-view" aria-live="polite" aria-busy="true">
+        <div class="status status--loading">
+          <span class="spinner" aria-hidden="true"></span>
+          <p class="status__text">로딩 중...</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section container" id="contact" aria-labelledby="contact-title">
+      <header class="section__header reveal">
+        <p class="eyebrow">04</p>
+        <h2 class="section__title" id="contact-title">Contact</h2>
+        <p class="section__desc">이 폼은 입력 검증을 보여주기 위한 것으로, 실제로 전송되지는 않습니다.</p>
+      </header>
+      <form class="contact-form reveal" id="contact-form" novalidate>
+        <div class="field">
+          <label class="field__label" for="contact-name">이름</label>
+          <input class="field__input" id="contact-name" name="name" type="text" autocomplete="name" aria-describedby="contact-name-error">
+          <p class="field__error" id="contact-name-error"></p>
+        </div>
+        <div class="field">
+          <label class="field__label" for="contact-email">이메일</label>
+          <input class="field__input" id="contact-email" name="email" type="email" autocomplete="email" aria-describedby="contact-email-error">
+          <p class="field__error" id="contact-email-error"></p>
+        </div>
+        <div class="field">
+          <label class="field__label" for="contact-message">메시지</label>
+          <textarea class="field__input field__input--textarea" id="contact-message" name="message" rows="5" aria-describedby="contact-message-error"></textarea>
+          <p class="field__error" id="contact-message-error"></p>
+        </div>
+        <button class="button button--primary" type="submit">보내기</button>
+        <p class="form-status" id="contact-status" role="status"></p>
+      </form>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p class="site-footer__copy">&copy; 2026 이상우</p>
+      <ul class="social">
+        <li><a class="social__link" href="https://github.com/sangwoo-codyssey" target="_blank" rel="noopener noreferrer">GitHub</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <button class="scroll-top" type="button" aria-label="맨 위로 이동">
+    <span aria-hidden="true">↑</span>
+  </button>
+</body>
+</html>
