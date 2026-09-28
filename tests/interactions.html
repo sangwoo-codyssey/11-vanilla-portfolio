@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>RUNNING</title></head>
+<body>
+<iframe id="mobile" src="../index.html" width="390" height="800"></iframe>
+<iframe id="desktop" src="../index.html" width="1280" height="800"></iframe>
+<pre id="out"></pre>
+<script>
+const log = [];
+const check = (name, cond, extra = '') => log.push(`${cond ? 'PASS' : 'FAIL'}  ${name}${extra ? '  (' + extra + ')' : ''}`);
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const loaded = (frame) => new Promise((r) => frame.addEventListener('load', r, { once: true }));
+// 처음 로드: iframe 은 잠깐 about:blank 문서를 가지므로, 실제 페이지가 뜰 때까지 기다린다
+const ready = async (f) => {
+  for (let i = 0; i < 80; i++) {
+    const doc = f.contentDocument;
+    if (doc && doc.location.pathname.endsWith('/index.html') && doc.readyState === 'complete' && doc.querySelector('.nav__toggle')) return;
+    await wait(100);
+  }
+  throw new Error('iframe 로드 대기 초과: ' + f.id);
+};
+
+async function run() {
+  const m = document.getElementById('mobile');
+  const dsk = document.getElementById('desktop');
+  await Promise.all([ready(m), ready(dsk)]);
+  await wait(300);
+  let w = m.contentWindow, d = m.contentDocument;
+  const $ = (sel) => d.querySelector(sel);
+
+  const pendingAtTop = d.querySelectorAll('.reveal.reveal--pending').length;
+  check('처음엔 화면 밖 요소가 대기 상태', pendingAtTop > 0, `대기 ${pendingAtTop}개`);
+
+  // --- 반응형: 햄버거 표시 여부
+  check('모바일(390): 햄버거 보임', w.getComputedStyle($('.nav__toggle')).display !== 'none');
+  check('모바일(390): 메뉴 처음엔 숨김', w.getComputedStyle($('.nav__menu')).display === 'none');
+  const dd = dsk.contentDocument, dw = dsk.contentWindow;
+  check('데스크톱(1280): 햄버거 숨김', dw.getComputedStyle(dd.querySelector('.nav__toggle')).display === 'none');
+  check('데스크톱(1280): 메뉴 가로로 보임', dw.getComputedStyle(dd.querySelector('.nav__menu')).flexDirection === 'row');
+
+  // --- 햄버거 토글
+  $('.nav__toggle').click();
+  check('햄버거 클릭 → 메뉴 .active', $('.nav__menu').classList.contains('active'));
+  check('햄버거 클릭 → aria-expanded=true', $('.nav__toggle').getAttribute('aria-expanded') === 'true');
+  $('.nav__toggle').click();
+  check('다시 클릭 → 메뉴 닫힘', !$('.nav__menu').classList.contains('active'));
+  $('.nav__toggle').click();
+  d.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+  check('Esc → 메뉴 닫힘', !$('.nav__menu').classList.contains('active'));
+
+  // --- 부드러운 스크롤 + 메뉴 닫힘
+  $('.nav__toggle').click();
+  d.querySelector('.nav__link[href="#contact"]').click();
+  check('메뉴 링크 클릭 → 메뉴 닫힘', !$('.nav__menu').classList.contains('active'));
+  await wait(50);
+  const midY = w.scrollY;
+  await wait(1500);
+  const contactTop = d.getElementById('contact').getBoundingClientRect().top;
+  check('메뉴 링크 → #contact 가 헤더(64px) 바로 아래에 멈춤', Math.abs(contactTop - 64) < 5, `top=${contactTop.toFixed(1)}`);
+  check('이동이 순간 이동이 아님(도중 위치 존재)', midY < w.scrollY, `50ms 후 ${midY}, 끝 ${w.scrollY}`);
+  check('URL 해시는 바뀌지 않음(preventDefault)', w.location.hash === '');
+
+  // --- 스크롤 기준값
+  w.scrollTo(0, 0); await wait(150);
+  check('맨 위: 헤더 .scrolled 없음', !$('.site-header').classList.contains('scrolled'));
+  check('맨 위: 스크롤탑 숨김', !$('.scroll-top').classList.contains('visible'));
+  w.scrollTo(0, 59); await wait(150);
+  check('59px: 헤더 배경 아직 없음', !$('.site-header').classList.contains('scrolled'));
+  w.scrollTo(0, 61); await wait(150);
+  check('61px: 헤더 .scrolled', $('.site-header').classList.contains('scrolled'));
+  w.scrollTo(0, 299); await wait(150);
+  check('299px: 스크롤탑 아직 숨김', !$('.scroll-top').classList.contains('visible'));
+  w.scrollTo(0, 301); await wait(150);
+  check('301px: 스크롤탑 보임', $('.scroll-top').classList.contains('visible'));
+  $('.scroll-top').click(); await wait(1500);
+  check('스크롤탑 클릭 → 맨 위', w.scrollY === 0, `scrollY=${w.scrollY}`);
+
+  // --- 스크롤 애니메이션
+  w.scrollTo(0, d.body.scrollHeight); await wait(800);
+  check('끝까지 스크롤 → 대기 요소 없음', d.querySelectorAll('.reveal.reveal--pending').length === 0);
+
+  // --- 다크 모드 + localStorage + 새로고침 유지
+  const bgLight = w.getComputedStyle(d.body).backgroundColor;
+  check('처음 테마 light', d.documentElement.dataset.theme === 'light');
+  $('.theme-toggle').click();
+  check('토글 → data-theme=dark', d.documentElement.dataset.theme === 'dark');
+  check('토글 → localStorage 저장', w.localStorage.getItem('portfolio-theme') === 'dark');
+  check('토글 → 버튼 문구 "라이트 모드"', $('.theme-toggle__label').textContent === '라이트 모드');
+  await wait(300);
+  check('토글 → 배경색이 실제로 바뀜', w.getComputedStyle(d.body).backgroundColor !== bgLight,
+        `${bgLight} → ${w.getComputedStyle(d.body).backgroundColor}`);
+  const reload = loaded(m); w.location.reload(); await reload; await wait(300);
+  w = m.contentWindow; d = m.contentDocument;
+  check('새로고침 후에도 dark 유지', d.documentElement.dataset.theme === 'dark');
+  d.querySelector('.theme-toggle').click();
+  check('다시 토글 → light 저장', w.localStorage.getItem('portfolio-theme') === 'light');
+
+  document.getElementById('out').textContent = log.join('\n');
+  document.title = 'DONE';
+}
+run().catch((e) => { document.getElementById('out').textContent = 'ERROR ' + e.stack; document.title = 'DONE'; });
+</script>
+</body></html>

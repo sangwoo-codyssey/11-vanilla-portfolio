@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160" role="img" aria-labelledby="profile-title">
+  <title id="profile-title">이상우의 프로필 일러스트</title>
+  <rect width="160" height="160" fill="#d7e9e6"/>
+  <circle cx="80" cy="64" r="26" fill="#2f6f68"/>
+  <path d="M26 160c2-34 25-56 54-56s52 22 54 56z" fill="#2f6f68"/>
+</svg>
