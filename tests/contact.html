@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>RUNNING</title></head>
+<body>
+<iframe id="a" src="../index.html?state=empty" width="1024" height="900"></iframe>
+<iframe id="b" src="../index.html?state=empty" width="600" height="600"></iframe>
+<pre id="out"></pre>
+<script>
+const log = [];
+const check = (name, cond, extra = '') => log.push(`${cond ? 'PASS' : 'FAIL'}  ${name}${extra ? '  (' + extra + ')' : ''}`);
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const loaded = async (f) => {
+  for (let i = 0; i < 80; i++) {
+    const doc = f.contentDocument;
+    if (doc && doc.location.pathname.endsWith('/index.html') && doc.readyState === 'complete' && doc.querySelector('#contact-form')) return;
+    await wait(100);
+  }
+  throw new Error('iframe 로드 대기 초과: ' + f.id);
+};
+
+async function run() {
+  const fa = document.getElementById('a'), fb = document.getElementById('b');
+  await Promise.all([loaded(fa), loaded(fb)]);
+  await wait(200);
+  const w = fa.contentWindow, d = fa.contentDocument;
+  const input = (f) => d.querySelector(`#contact-${f}`);
+  const err = (f) => d.querySelector(`#contact-${f}-error`).textContent;
+  const type = (f, v, doc = d) => { const el = doc.querySelector(`#contact-${f}`); el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); };
+  const leave = (f, doc = d) => doc.querySelector(`#contact-${f}`).dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
+  const submit = () => d.querySelector('#contact-form button[type="submit"]').click();
+
+  // 구조
+  ['name', 'email', 'message'].forEach((f) => {
+    const el = input(f);
+    check(`label for="${el.id}" 연결`, !!d.querySelector(`label[for="${el.id}"]`));
+    check(`${f}: 에러 문구가 입력칸 바로 아래`, el.nextElementSibling && el.nextElementSibling.id === `contact-${f}-error`);
+  });
+
+  // 처음
+  check('처음엔 에러 문구 없음', err('name') + err('email') + err('message') === '');
+
+  // 빈 제출
+  w.__marker = 'same-page';
+  submit(); await wait(50);
+  check('빈 제출 → 페이지 이동 없음(preventDefault)', w.__marker === 'same-page' && w.location.search === '?state=empty');
+  check('빈 제출 → 세 칸 모두 필수 에러', err('name').includes('이름') && err('email').includes('이메일을 입력') && err('message').includes('메시지'));
+  check('빈 제출 → .is-invalid + aria-invalid=true', ['name', 'email', 'message'].every((f) => input(f).classList.contains('is-invalid') && input(f).getAttribute('aria-invalid') === 'true'));
+  check('빈 제출 → 첫 에러 칸(이름)에 포커스', d.activeElement === input('name'));
+  check('빈 제출 → 성공 문구 없음', d.querySelector('#contact-status').textContent === '');
+
+  // 고치면 바로 사라짐
+  type('name', '이상우');
+  check('이름 입력 → 이름 에러 즉시 사라짐', err('name') === '' && !input('name').classList.contains('is-invalid'));
+  type('email', 'abc');
+  check('이메일 "abc" → 형식 에러', err('email').includes('형식'));
+  type('email', 'abc@def');
+  check('이메일 "abc@def" → 형식 에러(점 없음)', err('email').includes('형식'));
+  type('email', 'abc@def.com');
+  check('이메일 "abc@def.com" → 에러 없음', err('email') === '');
+  type('message', '   ');
+  check('메시지 공백만 → 필수 에러(trim)', err('message').includes('메시지'));
+
+  // 성공 제출
+  type('message', '안녕하세요');
+  submit(); await wait(50);
+  check('올바른 값 제출 → 성공 문구', d.querySelector('#contact-status').textContent.includes('감사합니다'));
+  check('성공 후 입력칸 비워짐', input('name').value === '' && input('email').value === '' && input('message').value === '');
+  check('성공 후 에러 문구 없음', err('name') + err('email') + err('message') === '');
+  type('name', '다시');
+  check('다시 입력하면 성공 문구 사라짐', d.querySelector('#contact-status').textContent === '');
+
+  // 건드리기 전에는 에러를 안 보여줌 (새 iframe)
+  const db = fb.contentDocument;
+  const errB = (f) => db.querySelector(`#contact-${f}-error`).textContent;
+  type('email', 'x', db);
+  check('칸을 벗어나기 전에는 형식 에러를 안 띄움', errB('email') === '');
+  leave('email', db);
+  check('칸을 벗어나면(focusout) 형식 에러 표시', errB('email').includes('형식'));
+  check('건드리지 않은 이름 칸은 계속 조용함', errB('name') === '');
+
+  document.getElementById('out').textContent = log.join('\n');
+  document.title = 'DONE';
+}
+run().catch((e) => { document.getElementById('out').textContent = 'ERROR ' + e.stack; document.title = 'DONE'; });
+</script>
+</body></html>
