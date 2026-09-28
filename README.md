@@ -8,7 +8,19 @@
 
 ## 스크린샷
 
-_배포 후 추가 — 데스크톱 / 모바일 / 다크 모드_
+배포 URL 을 Chrome 으로 열어 찍었다 (데스크톱 1280×800 · 모바일 390×844, 2배 해상도).
+
+**데스크톱**
+
+![데스크톱 라이트 모드 — 가로 네비와 Hero, About 시작 부분](docs/screenshots/desktop.png)
+
+**다크 모드**
+
+![데스크톱 다크 모드 — 같은 화면을 다크 테마로 전환한 상태, 토글 버튼 문구가 "라이트 모드"](docs/screenshots/dark.png)
+
+**모바일**
+
+<img src="docs/screenshots/mobile.png" alt="모바일 390px — 네비가 햄버거 버튼으로 접히고 Hero 제목이 세 줄로 줄바꿈된 화면" width="320">
 
 ## 사용 기술
 
@@ -42,6 +54,7 @@ _배포 후 추가 — 데스크톱 / 모바일 / 다크 모드_
 │   └── contact.js      # 문의 폼 검증
 ├── images/             # 프로필 일러스트 · 파비콘 (SVG)
 ├── tests/              # 브라우저 점검 페이지 (아래 "확인 방법")
+├── docs/screenshots/   # README 스크린샷
 ├── run.sh              # 로컬 서버 · 정적 검사
 └── README.md
 ```
@@ -140,6 +153,7 @@ DOM 을 직접 뒤집지 않고(`classList.toggle('active')` 만 호출하지 �
 | 폴더 구조 (과제 §4) | `index.html` · `css/style.css` · `js/` · `images/` |
 
 **브라우저 점검** — `./run.sh run` 후 Chrome 에서 아래 페이지를 연다. `index.html` 을 iframe 으로 띄워 클릭·스크롤·입력을 흉내 내고 결과를 PASS/FAIL 로 보여준다.
+점검 페이지도 함께 배포되므로 배포본에서 바로 열 수도 있다 — 예: <https://sangwoo-codyssey.github.io/11-vanilla-portfolio/tests/interactions.html>
 
 | 페이지 | 항목 | 내용 |
 |---|---|---|
@@ -159,6 +173,6 @@ DOM 을 직접 뒤집지 않고(`classList.toggle('active')` 만 호출하지 �
 ## 제출물 체크리스트
 
 - [x] GitHub 저장소 URL — <https://github.com/sangwoo-codyssey/11-vanilla-portfolio>
-- [ ] 배포된 사이트 URL (GitHub Pages)
-- [ ] 데스크톱 / 모바일 / 다크 모드 스크린샷
-- [ ] README (프로젝트 설명 · 사용 기술 · 배포 URL · 스크린샷) — 스크린샷만 남음
+- [x] 배포된 사이트 URL (GitHub Pages) — <https://sangwoo-codyssey.github.io/11-vanilla-portfolio/>
+- [x] 데스크톱 / 모바일 / 다크 모드 스크린샷 — `docs/screenshots/`
+- [x] README (프로젝트 설명 · 사용 기술 · 배포 URL · 스크린샷)
