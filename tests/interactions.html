@@ -18,11 +18,20 @@ const ready = async (f) => {
   }
   throw new Error('iframe 로드 대기 초과: ' + f.id);
 };
+// Projects 카드는 API 응답 뒤에 들어와 아래 섹션을 수천 px 밀어낸다 — 스크롤 위치를 재기 전에 로딩이 끝나기를 기다린다
+const settled = async (f) => {
+  for (let i = 0; i < 60; i++) {
+    if (f.contentDocument.getElementById('projects-view').getAttribute('aria-busy') !== 'true') return;
+    await wait(250);
+  }
+  throw new Error('Projects 로딩 대기 초과: ' + f.id);
+};
 
 async function run() {
   const m = document.getElementById('mobile');
   const dsk = document.getElementById('desktop');
   await Promise.all([ready(m), ready(dsk)]);
+  await Promise.all([settled(m), settled(dsk)]);
   await wait(300);
   let w = m.contentWindow, d = m.contentDocument;
   const $ = (sel) => d.querySelector(sel);
@@ -75,8 +84,10 @@ async function run() {
   check('스크롤탑 클릭 → 맨 위', w.scrollY === 0, `scrollY=${w.scrollY}`);
 
   // --- 스크롤 애니메이션
+  // 맨 아래로 한 번에 점프하면 중간 요소는 화면에 들어온 적이 없다 — 사용자가 내리듯 반 화면씩 내려간다
+  for (let y = 0; y < d.body.scrollHeight; y += w.innerHeight / 2) { w.scrollTo(0, y); await wait(100); }
   w.scrollTo(0, d.body.scrollHeight); await wait(800);
-  check('끝까지 스크롤 → 대기 요소 없음', d.querySelectorAll('.reveal.reveal--pending').length === 0);
+  check('위에서 끝까지 스크롤 → 대기 요소 없음', d.querySelectorAll('.reveal.reveal--pending').length === 0);
 
   // --- 다크 모드 + localStorage + 새로고침 유지
   const bgLight = w.getComputedStyle(d.body).backgroundColor;
