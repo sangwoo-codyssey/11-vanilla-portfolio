@@ -68,8 +68,9 @@ cmd_test() {
   # 아래는 "패턴이 없으면 실패" 인 검사라 check 로 안 된다. 해당 줄을 뽑은 뒤 조건에 안 맞는 것을 다시 건진다.
   echo
   echo "[HTML — 과제 §4]"
+  # 페이지 마크업(index.html)만 본다 — tests/ 의 JS 문자열 속 '<img' 까지 태그로 보면 오탐이 난다
   report "img 에 alt 속성 존재" \
-    "$(echo "$html_files" | xargs grep -nE '<img' 2>/dev/null | grep -v 'alt=' || true)"
+    "$(grep -nE '<img' index.html | grep -v 'alt=' || true)"
   report "script 는 defer 로 연결" \
     "$(grep -nE '<script[^>]*src=' index.html | grep -v 'defer' || true)"
 
